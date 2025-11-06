@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { SessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
+import QueryProvider from "@/components/providers/query-provider";
 
 
 export const metadata: Metadata = {
@@ -27,7 +28,9 @@ export default function RootLayout({
         className={`${poppins.variable} antialiased`}
       >
         <SessionProvider>
-          {children}
+          <QueryProvider>
+            {children}
+          </QueryProvider>
         </SessionProvider>
       </body>
     </html>
