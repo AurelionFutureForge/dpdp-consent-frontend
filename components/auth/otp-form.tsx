@@ -57,7 +57,6 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onEditEmail }) => {
         // Clear OTP data from store after successful login
         clearOtpData();
         // Redirect to dashboard or home page
-        router.push("/dashboard");
       } else {
         console.warn("⚠️ [OTP Form] Unexpected result state:", result);
         setError("Unexpected authentication response. Please try again.");

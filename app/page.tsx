@@ -49,7 +49,7 @@ export default function Home() {
   const handleGoogleError = (error: string) => {
     console.error("Google login error:", error);
     setGoogleError(error);
-  };
+  }
 
   return (
     <div className="min-h-screen bg-white flex font-sans">

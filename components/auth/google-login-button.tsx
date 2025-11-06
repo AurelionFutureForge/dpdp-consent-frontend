@@ -29,8 +29,6 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
           onError(errorMessage);
         }
       } else if (result?.ok) {
-        // Redirect to dashboard
-        router.push("/dashboard");
       } else {
         console.warn("⚠️ [Google Login] Unexpected result state:", result);
       }

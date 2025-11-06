@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getToken, JWT } from "next-auth/jwt";
 import { NextRequest } from "next/server";
 
 export async function proxy(req: NextRequest) {
@@ -25,9 +25,23 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
+  const isAdmin = Boolean((token as JWT)?.isSystemAdmin);
+  const isSysAdminRoute = req.nextUrl.pathname.startsWith("/sys-admin");
+  const isDfRoute = req.nextUrl.pathname.startsWith("/df");
+
   // Redirect unauthenticated users to login
   if (!isAuthenticated && !isAuthPage) {
     return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  // Block access to sys-admin routes if not system admin
+  if (isAuthenticated && isSysAdminRoute && !isAdmin) {
+    return NextResponse.redirect(new URL("/df", req.url));
+  }
+
+  // Block access to df routes if system admin
+  if (isAuthenticated && isDfRoute && isAdmin) {
+    return NextResponse.redirect(new URL("/sys-admin", req.url));
   }
 
   // Redirect authenticated users away from login page
@@ -35,9 +49,9 @@ export async function proxy(req: NextRequest) {
   if (isAuthenticated && isAuthPage) {
     const hasError = req.nextUrl.searchParams.has("error");
     if (!hasError) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      const target = isAdmin ? "/sys-admin" : "/df";
+      return NextResponse.redirect(new URL(target, req.url));
     }
-    // If there's an error, allow them to see the error on the login page
   }
 
   return NextResponse.next();
@@ -54,7 +68,8 @@ export const config = {
      */
     '/',
     '/api/auth/error',
-    '/dashboard/:path*',
+    '/sys-admin/:path*',
+    '/df/:path*',
     '/admins/:path*',
     '/categories/:path',
     '/change-password/:path*'
