@@ -13,6 +13,9 @@ The DPDP Consent Management System frontend is a user-centric web application bu
 - **Multiple Authentication Methods**:
   - Multi-Factor Authentication (MFA) via email
   - Single Sign-On (SSO) with Google
+- **Robust Error Handling**: Consistent backend error surfacing on the login page, including Google OAuth failures (temporary `/api/auth/error` store)
+- **Role-Based Routing (Server-Side)**: Middleware-based redirects and route locks for System Admins vs Data Fiduciaries
+- **Data Fiduciary Registration**: Guided registration flow with image upload & cropping
 - **Privacy-First**: Built with privacy and data protection principles at its core
 - **Accessibility**: WCAG 2.1 AA compliant for inclusive user experience
 - **Government Compliant**: Designed for MEITY standards and DPDP Act compliance
@@ -41,27 +44,44 @@ The DPDP Consent Management System frontend is a user-centric web application bu
 ```
 dpdp-consent-frontend/
 ├── app/
-│   ├── globals.css           # Global styles and Tailwind configuration
-│   ├── layout.tsx            # Root layout with fonts and metadata
-│   └── page.tsx              # Landing/Login page
+│   ├── (dashboard)/
+│   │   ├── sys-admin/
+│   │   │   ├── layout.tsx
+│   │   │   └── dashboard/page.tsx
+│   │   └── df/
+│   │       ├── layout.tsx
+│   │       └── dashboard/page.tsx
+│   ├── api/
+│   │   └── auth/
+│   │       └── error/route.ts    # Temporary store to surface OAuth errors to the UI
+│   ├── df-register/
+│   │   ├── _components/registration-form.tsx
+│   │   └── page.tsx              # Data Fiduciary registration page
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx                  # Landing/Login page
 ├── components/
-│   ├── auth/                 # Authentication components
+│   ├── auth/
 │   │   ├── google-login-button.tsx
 │   │   ├── mfa-form.tsx
-│   │   └── index.ts
-│   └── ui/                   # Reusable UI components
-│       ├── button.tsx
-│       ├── input.tsx
-│       ├── label.tsx
+│   │   ├── otp-form.tsx
+│   │   └── mfa-tabs.tsx
+│   ├── providers/
+│   │   └── theme-provider.tsx
+│   └── ui/
+│       ├── image-uploader.tsx    # UploadThing + crop flow for images (logo upload)
 │       └── ...
 ├── lib/
-│   └── utils.ts              # Utility functions (cn, etc.)
-├── public/
-│   └── preference_popup.svg  # Illustration assets
-├── CODE_OF_CONDUCT.md        # Community guidelines
-├── CONTRIBUTING.md           # Contribution guidelines
-├── LICENSE                   # Apache 2.0 License
-└── README.md                 # This file
+│   ├── admin-menu-list.ts        # Admin sidebar menu model
+│   ├── df-menu-list.ts           # DF sidebar menu model
+│   └── parse-api-errors.ts       # Centralized API error parsing
+├── services/
+│   └── auth/
+│       ├── api.ts                # login, data-fiduciary/register
+│       └── types.ts              # typed APIs
+├── middleware.ts                 # Re-export of proxy middleware
+├── proxy.ts                      # Server-side role-based routing & auth gate
+└── README.md
 ```
 
 ## Prerequisites
@@ -144,11 +164,21 @@ The application supports two authentication methods:
    - One-click authentication
    - Secure and convenient
 
+#### Error Surfacing for Google/NextAuth
+- On OAuth failure (e.g., AccessDenied), the backend error message is stored temporarily via `POST /api/auth/error`.
+- The login page detects `?error=AccessDenied`, fetches the most recent message from `GET /api/auth/error`, displays it, then cleans the URL.
+
+#### Credentials (MFA) Flow
+- `MFAForm` calls `POST /auth/login` with `{ email, type: "MFA" }` and stores `otp_id`, `email`, `expires_in` in a Zustand store.
+- `OTPForm` submits `{ email, otp, otp_id }` to the NextAuth credentials provider which forwards to backend `/auth/verify-otp`.
+- On success, JWT and session callbacks enrich session with `isSystemAdmin` and `dataFiduciaryId`.
+
 ### User Interface
 
 - **Landing Page**: Clean, government-compliant design with:
   - DPDP-themed illustration
   - Clear authentication options
+  - Error banner for OAuth failures
   - Government branding (MEITY)
   - Developer attribution
 
@@ -196,6 +226,10 @@ This frontend is designed to work with the DPDP Consent Management System backen
 
 ```env
 NEXT_PUBLIC_API_URL=https://your-backend-api.com/api/v1
+NEXTAUTH_SECRET=your_nextauth_secret
+NEXTAUTH_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
 ```
 
 ## Browser Support
@@ -224,6 +258,33 @@ NEXT_PUBLIC_API_URL=https://your-backend-api.com/api/v1
 4. **Push and create a Pull Request**
 
 For more details, see [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+## Role-Based Routing & Access Control
+
+- Implemented entirely in `proxy.ts` (wired via `middleware.ts`).
+- Behavior:
+  - Unauthenticated users are redirected to `/` (except allowed routes like `/api/auth/*` and `/df-register`).
+  - Authenticated users with `isSystemAdmin: true` are routed to `/sys-admin/*`; others to `/df/*`.
+  - Access is enforced:
+    - System Admins are blocked from `/df/*` (redirected to `/sys-admin`).
+    - Data Fiduciaries are blocked from `/sys-admin/*` (redirected to `/df`).
+  - Visiting `/` while authenticated redirects to the role-appropriate area (unless `?error=...`).
+
+## Data Fiduciary Registration
+
+- Path: `/df-register`
+- Features:
+  - Form with validation for organization details
+  - Logo upload & crop via `components/ui/image-uploader.tsx`
+  - Submits to `POST /data-fiduciary/register`
+  - On success, shows a toast and returns to `/`
+
+## Conventions
+
+- Use `services/auth/types.ts` to define request/response types.
+- Implement API calls in `services/auth/api.ts` using `axiosBase`.
+- Use `lib/parse-api-errors.ts` to extract messages from failures.
+- Keep client redirects minimal; prefer server-side redirects in `proxy.ts`.
 
 ## Compliance & Privacy
 
