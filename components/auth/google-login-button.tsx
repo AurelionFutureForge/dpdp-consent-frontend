@@ -2,32 +2,50 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface GoogleLoginButtonProps {
   onError?: (error: string) => void;
-  isLoading?: boolean;
-  disabled?: boolean;
 }
 
 export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   onError,
-  isLoading = false,
-  disabled = false,
 }) => {
-  const handleGoogleLogin = async () => {
-    try {
-      // TODO: Implement Google OAuth sign-in logic
-      // This will connect to your authentication backend
-      console.log("Google login clicked");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-      // Placeholder for actual implementation
-      if (onError) {
-        onError("Google login not yet implemented");
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      // Use NextAuth signIn with Google provider
+      const result = await signIn("google", {
+        redirect: false,
+      });
+
+      if (result?.error) {
+        const errorMessage = result.error || "Failed to authenticate with Google. Please try again.";
+        if (onError) {
+          onError(errorMessage);
+        }
+      } else if (result?.ok) {
+      } else {
+        console.warn("⚠️ [Google Login] Unexpected result state:", result);
       }
-    } catch (error) {
+    } catch (err) {
+      console.error("💥 [Google Login] Exception during authentication:", err);
+      const error = err as Error;
+      console.error("💥 [Google Login] Error details:", {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name,
+      });
+      const errorMessage = error?.message || "Failed to connect to Google. Please try again.";
       if (onError) {
-        onError("Failed to connect to Google. Please try again.");
+        onError(errorMessage);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -37,7 +55,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       variant="outline"
       className="w-full flex items-center justify-center gap-3 h-11 text-base font-medium bg-white border border-gray-300 hover:bg-gray-50"
       onClick={handleGoogleLogin}
-      disabled={isLoading || disabled}
+      disabled={isLoading}
     >
       <svg className="h-5 w-5" viewBox="0 0 24 24">
         <path

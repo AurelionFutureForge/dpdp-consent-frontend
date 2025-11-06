@@ -1,32 +1,56 @@
 "use client";
 
-import React, { useState } from "react";
-import { MFAForm } from "@/components/auth/mfa-form";
+import React, { useState, useEffect } from "react";
+import { MFATabs } from "@/components/auth/mfa-tabs";
 import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
-  const [isMfaLoading, setIsMfaLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [mfaStep, setMfaStep] = useState<"email" | "otp">("email");
+  const [googleError, setGoogleError] = useState<string>("");
+  const router = useRouter();
 
-  const handleMfaSubmit = async (email: string) => {
-    setIsMfaLoading(true);
-    try {
-      // TODO: Implement MFA authentication logic
-      console.log("MFA email submitted:", email);
-      // Placeholder: Add your authentication logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    } catch (error) {
-      console.error("MFA error:", error);
-    } finally {
-      setIsMfaLoading(false);
+  useEffect(() => {
+    // Check for error in query params using window.location
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const error = params.get("error");
+
+      if (error === "AccessDenied") {
+      // Fetch the backend error message from our API
+      const fetchError = async () => {
+        try {
+          // Fetch the most recent error (no errorId needed)
+          const response = await fetch("/api/auth/error");
+          const data = await response.json();
+
+          if (data.success && data.message) {
+            setGoogleError(data.message);
+          } else {
+            // If no specific error found, show generic message
+            setGoogleError("Access denied. Please check your email or contact support.");
+          }
+
+          // Redirect to clean URL
+          router.replace("/");
+        } catch (err) {
+          console.error("Failed to fetch error:", err);
+          setGoogleError("An error occurred during authentication. Please try again.");
+          router.replace("/");
+        }
+      };
+
+      fetchError();
+      }
     }
-  };
+  }, [router]);
 
   const handleGoogleError = (error: string) => {
     console.error("Google login error:", error);
-    // TODO: Show error toast/notification
-  };
+    setGoogleError(error);
+  }
 
   return (
     <div className="min-h-screen bg-white flex font-sans">
@@ -98,14 +122,13 @@ export default function Home() {
                   <h3 className="text-sm font-semibold text-gray-900 mb-1">
                     Multi-Factor Authentication
                   </h3>
-                  <p className="text-xs text-gray-500 mb-4">
-                    Enter your email to receive a verification code
-                  </p>
+                  {mfaStep === "email" && (
+                    <p className="text-xs text-gray-500 mb-4">
+                      Enter your email to receive a verification code
+                    </p>
+                  )}
                 </div>
-                <MFAForm
-                  onSubmit={handleMfaSubmit}
-                  isLoading={isMfaLoading}
-                />
+                <MFATabs onStepChange={setMfaStep} />
               </div>
 
               {/* Divider */}
@@ -125,12 +148,25 @@ export default function Home() {
                     Continue with your organization account
                   </p>
                 </div>
+                {googleError && (
+                  <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                    <p className="text-sm text-red-600">{googleError}</p>
+                  </div>
+                )}
                 <GoogleLoginButton
                   onError={handleGoogleError}
-                  isLoading={isGoogleLoading}
                 />
               </div>
             </div>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              New organization?{" "}
+              <Link href="/df-register" className="text-blue-600 hover:underline font-medium">
+                Register as Data Fiduciary
+              </Link>
+            </p>
           </div>
 
           <p className="text-center text-xs text-gray-500">
