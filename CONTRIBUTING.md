@@ -61,6 +61,23 @@ This project adheres to a Code of Conduct that all contributors are expected to 
 
    The application will be available at [http://localhost:3000](http://localhost:3000).
 
+### Auth & Routing Notes
+
+- Role-based routing is enforced server-side in `proxy.ts`. Avoid adding client-side auth redirects in pages unless strictly necessary for UX.
+- OAuth/NextAuth errors are surfaced to the login page via a temporary API store at `/api/auth/error`.
+- When adding new authenticated routes, ensure they fall under `/sys-admin/*` (for `isSystemAdmin`) or `/df/*` (for non-admin Data Fiduciaries).
+
+### API & Types
+
+- Define request/response types in `services/auth/types.ts`.
+- Add API functions in `services/auth/api.ts` using `axiosBase`.
+- Use `lib/parse-api-errors.ts` to present consistent error messages.
+
+### UI & Components
+
+- Prefer building forms with `components/ui/*` primitives.
+- For image uploads, use `components/ui/image-uploader.tsx` (UploadThing + crop) and pass the resulting URL to the API payloads.
+
 ## Project Structure
 
 ```
