@@ -8,6 +8,7 @@ export async function proxy(req: NextRequest) {
 
   const isAuthPage = req.nextUrl.pathname === "/"; // Your login page is at root
   const isApiAuthRoute = req.nextUrl.pathname.startsWith("/api/auth");
+  const isRegisterPage = req.nextUrl.pathname === "/df-register";
 
   // Handle NextAuth error redirects - redirect to home page with error param
   if (isApiAuthRoute && req.nextUrl.pathname === "/api/auth/error") {
@@ -22,6 +23,11 @@ export async function proxy(req: NextRequest) {
 
   // Allow API auth routes (except error which we handle above)
   if (isApiAuthRoute) {
+    return NextResponse.next();
+  }
+
+  // Allow unauthenticated users to access registration page
+  if (isRegisterPage) {
     return NextResponse.next();
   }
 

@@ -31,3 +31,44 @@ export interface LoginResponseData {
  */
 export type LoginResponse = BaseResponse<LoginResponseData>;
 
+/**
+ * Data Fiduciary Registration request payload
+ */
+export interface DataFiduciaryRegisterPayload {
+  name: string;
+  legal_name: string;
+  registration_number: string;
+  contact_email: string;
+  contact_phone: string;
+  dpo_email: string;
+  dpo_phone: string;
+  website_url: string;
+  logo_url: string;
+  privacy_policy_url: string;
+  terms_url: string;
+}
+
+/**
+ * Data Fiduciary Registration response data
+ */
+export interface DataFiduciaryRegisterResponseData {
+  data_fiduciary_id: string;
+  name: string;
+  legal_name: string;
+  registration_number: string;
+  contact_email: string;
+  contact_phone: string;
+  dpo_email: string;
+  dpo_phone: string;
+  website_url: string;
+  logo_url: string;
+  privacy_policy_url: string;
+  terms_url: string;
+  status: string;
+  created_at: string;
+}
+
+/**
+ * Data Fiduciary Registration API response
+ */
+export type DataFiduciaryRegisterResponse = BaseResponse<DataFiduciaryRegisterResponseData>;

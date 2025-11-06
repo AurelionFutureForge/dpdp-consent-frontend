@@ -5,6 +5,7 @@ import { MFATabs } from "@/components/auth/mfa-tabs";
 import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
   const [mfaStep, setMfaStep] = useState<"email" | "otp">("email");
@@ -157,6 +158,15 @@ export default function Home() {
                 />
               </div>
             </div>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              New organization?{" "}
+              <Link href="/df-register" className="text-blue-600 hover:underline font-medium">
+                Register as Data Fiduciary
+              </Link>
+            </p>
           </div>
 
           <p className="text-center text-xs text-gray-500">

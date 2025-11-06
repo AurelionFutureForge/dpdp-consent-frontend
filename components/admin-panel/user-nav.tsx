@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 export function UserNav() {
   const { data: session } = useSession();
@@ -70,7 +70,7 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="hover:cursor-pointer" onClick={() => {}}>
+        <DropdownMenuItem className="hover:cursor-pointer" onClick={() => signOut()}>
           <LogOut className="w-4 h-4 mr-3 text-muted-foreground" />
           Sign out
         </DropdownMenuItem>

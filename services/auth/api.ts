@@ -1,5 +1,10 @@
 import { axiosBase } from "@/lib/axios-instance";
-import type { LoginRequestPayload, LoginResponse } from "./types";
+import type {
+  LoginRequestPayload,
+  LoginResponse,
+  DataFiduciaryRegisterPayload,
+  DataFiduciaryRegisterResponse
+} from "./types";
 
 /**
  * Send OTP to user's email for MFA authentication.
@@ -12,3 +17,13 @@ export const loginApi = async (
   return res.data;
 };
 
+/**
+ * Register a new Data Fiduciary.
+ * This endpoint creates a new data fiduciary organization.
+ */
+export const registerDataFiduciaryApi = async (
+  payload: DataFiduciaryRegisterPayload
+): Promise<DataFiduciaryRegisterResponse> => {
+  const res = await axiosBase.post("/data-fiduciary/register", payload);
+  return res.data;
+};
