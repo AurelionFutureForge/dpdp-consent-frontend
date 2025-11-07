@@ -20,9 +20,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 export function UserNav() {
+  const { data: session } = useSession();
+  const user = session?.user;
   return (
     <DropdownMenu>
       <TooltipProvider disableHoverableContent>
@@ -35,7 +37,7 @@ export function UserNav() {
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="#" alt="Avatar" />
-                  <AvatarFallback className="bg-transparent">JD</AvatarFallback>
+                  <AvatarFallback className="bg-transparent">{user?.name?.charAt(0)}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -47,9 +49,9 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">John Doe</p>
+            <p className="text-sm font-medium leading-none">{user?.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              johndoe@example.com
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
