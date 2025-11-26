@@ -1,3 +1,6 @@
+"use client";
+
+import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FolderKanban, CalendarDays, ListChecks } from "lucide-react";
@@ -16,6 +19,10 @@ interface PurposeCategoryCardProps {
 }
 
 export function PurposeCategoryCard({ category }: PurposeCategoryCardProps) {
+  const router = useRouter();
+  const params = useParams();
+  const dfId = params["df-id"] as string;
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -25,8 +32,15 @@ export function PurposeCategoryCard({ category }: PurposeCategoryCardProps) {
     });
   };
 
+  const handleClick = () => {
+    router.push(`/sys-admin/purposes/${dfId}/${category.purpose_category_id}`);
+  };
+
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card
+      className="hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={handleClick}
+    >
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">

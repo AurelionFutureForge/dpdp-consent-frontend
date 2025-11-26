@@ -6,6 +6,7 @@ import {
   updatePurposeApi,
   togglePurposeApi,
   deletePurposeApi,
+  getActivePurposesByFiduciaryApi,
 } from "./api";
 import type {
   CreatePurposePayload,
@@ -287,4 +288,15 @@ export const useDeletePurpose = () => {
     },
   });
 };
+
+/**
+ * 7) Fetch all active purposes by data fiduciary id
+ */
+export const useGetActivePurposesByFiduciary = (dataFiduciaryId: string) =>
+  useQuery({
+    queryKey: ["active-purposes", dataFiduciaryId],
+    queryFn: () => getActivePurposesByFiduciaryApi(dataFiduciaryId),
+    enabled: Boolean(dataFiduciaryId),
+    staleTime: 5_000,
+  });
 

@@ -59,7 +59,7 @@ export default function PurposesPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const categoryId = params["purpose-id"] as string;
+  const categoryId = params["category-id"] as string;
   const dfId = session?.user?.dataFiduciaryId || "";
 
   const [page, setPage] = useState(1);

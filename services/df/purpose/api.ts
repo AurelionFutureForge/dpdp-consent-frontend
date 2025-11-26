@@ -8,6 +8,7 @@ import type {
   UpdatePurposeApiResponse,
   TogglePurposeApiResponse,
   DeletePurposeApiResponse,
+  ActivePurposesApiResponse,
   PurposeSortBy,
   SortOrder,
 } from "./types";
@@ -104,6 +105,18 @@ export const deletePurposeApi = async (
 ): Promise<DeletePurposeApiResponse> => {
   const response = await axiosInstance.delete(
     `/purposes/${dataFiduciaryId}/${purposeId}`
+  );
+  return response.data;
+};
+
+/**
+ * 7) Get all active purposes by data fiduciary id
+ */
+export const getActivePurposesByFiduciaryApi = async (
+  dataFiduciaryId: string
+): Promise<ActivePurposesApiResponse> => {
+  const response = await axiosInstance.get(
+    `/purposes/${dataFiduciaryId}/active`
   );
   return response.data;
 };

@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Pencil } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useAuthStore } from "@/store/auth-store";
-import { useRouter } from "next/navigation";
 
 interface OTPFormProps {
   email?: string;
@@ -18,7 +17,6 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onEditEmail }) => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const otp_id = useAuthStore((state) => state.otp_id);
   const clearOtpData = useAuthStore((state) => state.clearOtpData);
 
@@ -56,7 +54,9 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onEditEmail }) => {
       } else if (result?.ok) {
         // Clear OTP data from store after successful login
         clearOtpData();
-        // Redirect to dashboard or home page
+        // Reload the page to trigger middleware redirect based on role
+        // The middleware will check the token and redirect to the appropriate dashboard
+        window.location.href = "/";
       } else {
         console.warn("⚠️ [OTP Form] Unexpected result state:", result);
         setError("Unexpected authentication response. Please try again.");

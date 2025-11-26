@@ -50,6 +50,9 @@ export type PurposeListApiResponse = BaseResponse<{
   meta: { pagination: PurposePagination };
 }>;
 
+// Active purposes response (array of purposes directly)
+export type ActivePurposesApiResponse = BaseResponse<PurposeItem[]>;
+
 // Purpose analytics types
 export interface PurposeCounts {
   total_purposes: number;
