@@ -25,13 +25,13 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "",
       menus: [
         {
-          href: "/df/dashboard",
+          href: "#",
           label: "Overview",
           icon: LayoutGrid,
           submenus: []
         },
         {
-          href: "/df/profile",
+          href: "#",
           label: "Profile",
           icon: Users
         }
@@ -46,7 +46,7 @@ export function getMenuList(pathname: string): Group[] {
           icon: Tag
         },
         {
-          href: "/df/consents",
+          href: "#",
           label: "Consents",
           icon: CheckSquare
         }
@@ -56,12 +56,12 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Integrations",
       menus: [
         {
-          href: "/df/webhooks",
+          href: "#",
           label: "Webhooks",
           icon: Webhook
         },
         {
-          href: "/df/validation",
+          href: "#",
           label: "Validation",
           icon: ShieldCheck
         }
@@ -71,12 +71,12 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Compliance",
       menus: [
         {
-          href: "/df/grievances",
+          href: "#",
           label: "Grievances",
           icon: SquarePen
         },
         {
-          href: "/df/audit-logs",
+          href: "#",
           label: "Audit Logs",
           icon: FileCheck
         }
@@ -86,7 +86,7 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Data Management",
       menus: [
         {
-          href: "/df/retention",
+          href: "#",
           label: "Retention & Expiry",
           icon: Timer
         }
@@ -96,7 +96,7 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "System",
       menus: [
         {
-          href: "/df/settings",
+          href: "#",
           label: "Settings",
           icon: Settings
         }

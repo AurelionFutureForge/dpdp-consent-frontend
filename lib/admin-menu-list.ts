@@ -36,12 +36,12 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Directory",
       menus: [
         {
-          href: "/sys-admin/data-fiduciaries",
+          href: "#",
           label: "Data Fiduciaries",
           icon: Users
         },
         {
-          href: "/sys-admin/users",
+          href: "#",
           label: "Users & Roles",
           icon: Users
         }
@@ -56,7 +56,7 @@ export function getMenuList(pathname: string): Group[] {
           icon: Tag
         },
         {
-          href: "/sys-admin/retention",
+          href: "#",
           label: "Retention Policies",
           icon: Timer
         }
@@ -66,12 +66,12 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Operations",
       menus: [
         {
-          href: "/sys-admin/scheduler",
+          href: "#",
           label: "Scheduler",
           icon: Calendar
         },
         {
-          href: "/sys-admin/notifications",
+          href: "#",
           label: "Notifications",
           icon: Bell
         }
@@ -81,12 +81,12 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Compliance",
       menus: [
         {
-          href: "/sys-admin/grievances",
+          href: "#",
           label: "Grievances",
           icon: SquarePen
         },
         {
-          href: "/sys-admin/audit-logs",
+          href: "#",
           label: "Audit Logs",
           icon: FileCheck
         }
@@ -96,7 +96,7 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "System",
       menus: [
         {
-          href: "/sys-admin/settings",
+          href: "#",
           label: "Settings",
           icon: Settings
         }
