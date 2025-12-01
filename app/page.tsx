@@ -6,14 +6,22 @@ import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
+import { useSession } from "next-auth/react";
 export default function Home() {
   const [mfaStep, setMfaStep] = useState<"email" | "otp">("email");
   const [googleError, setGoogleError] = useState<string>("");
   const router = useRouter();
+  const {data: session} = useSession()  ;
+
 
   useEffect(() => {
     // Check for error in query params using window.location
+    if (session?.user?.isSystemAdmin === true) {
+      router.replace("/sys-admin");
+    }
+    if (session?.user?.isSystemAdmin === false) {
+      router.replace("/df");
+    }
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const error = params.get("error");
