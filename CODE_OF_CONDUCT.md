@@ -1,5 +1,5 @@
 # 🧭 Code of Conduct
-### DPDP Consent Management System - Frontend
+### DPDP Consent Management System
 _Aurelion Future Forge Private Limited_
 
 ---

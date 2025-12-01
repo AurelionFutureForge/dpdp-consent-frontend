@@ -113,8 +113,8 @@ export default function ConsentLifecycleDemoPage() {
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Experience seamless data management with privacy-first approach
-            </p>
-          </div>
+                </p>
+              </div>
 
           {/* CTA Section */}
           <div className="bg-white rounded-lg p-8 shadow-sm border mt-12">
@@ -122,26 +122,26 @@ export default function ConsentLifecycleDemoPage() {
               <CheckCircle2 className="h-6 w-6 text-green-600" />
               <p className="text-lg font-medium text-gray-900">
                 Getting Started
-              </p>
-            </div>
+                  </p>
+                </div>
             <p className="text-gray-600 mb-6">
               To continue, please review and accept our consent terms. This ensures
               transparency and compliance with data protection regulations.
             </p>
 
-            {/* Loading State */}
-            {isLoading && (
+              {/* Loading State */}
+              {isLoading && (
               <div className="flex flex-col items-center justify-center space-y-4 py-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">
                   {isLoadingPurposes
-                    ? "Loading purposes..."
-                    : initiateMutation.isPending
-                    ? "Initiating consent request..."
+                      ? "Loading purposes..."
+                      : initiateMutation.isPending
+                      ? "Initiating consent request..."
                     : "Preparing your consent form..."}
-                </p>
-              </div>
-            )}
+                  </p>
+                </div>
+              )}
 
             {/* Ready State */}
             {!isLoading && allPurposeIds.length > 0 && (
