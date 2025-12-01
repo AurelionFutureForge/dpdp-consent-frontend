@@ -11,7 +11,7 @@ export default function Home() {
   const [mfaStep, setMfaStep] = useState<"email" | "otp">("email");
   const [googleError, setGoogleError] = useState<string>("");
   const router = useRouter();
-  const {data: session} = useSession()  ;
+  const {data: session} = useSession();
 
 
   useEffect(() => {
