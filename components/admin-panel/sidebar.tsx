@@ -43,7 +43,7 @@ export function Sidebar() {
                   : "translate-x-0 opacity-100"
               )}
             >
-              DPDP CMS
+              DPDP CMS - ADMIN
             </h1>
           </Link>
         </Button>
