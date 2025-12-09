@@ -662,7 +662,6 @@ This project adheres to a Code of Conduct. Please read [CODE_OF_CONDUCT.md](./CO
 ISC
 
 ---
-
 **Developed by**: Aurelion Future Forge Private Limited
 **Project**: DPDP Consent Management System (CMS)
 **Compliance**: Digital Personal Data Protection (DPDP) Act, 2023
