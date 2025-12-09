@@ -1,5 +1,5 @@
 "use client";
 import { redirect } from "next/navigation";
 export default function SysAdminPage() {
-  redirect('/sys-admin/dashboard')
+  redirect('/sys-admin/purposes')
 }

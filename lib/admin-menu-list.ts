@@ -25,7 +25,7 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "",
       menus: [
         {
-          href: "/sys-admin/dashboard",
+          href: "#",
           label: "Overview",
           icon: LayoutGrid,
           submenus: []
