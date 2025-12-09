@@ -23,23 +23,51 @@ import {
   RotateCcw,
   XCircle,
   AlertTriangle,
-  Hash,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Generate UUID using browser's crypto API
+const generateUUID = (): string => {
+  if (typeof window !== "undefined" && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  // Fallback for older browsers
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 // Default values
 const DEFAULT_DATA_FIDUCIARY_ID = "99d8e106-9ed6-4698-8db0-71c0aa91ab24";
-const DEFAULT_EXTERNAL_USER_ID = "123436";
 const LIMIT = 100000;
+
+// Helper function to get or create user ID from localStorage
+const getOrCreateUserId = (): string => {
+  if (typeof window === "undefined") return "";
+
+  const storedUserId = localStorage.getItem("consent_user_id");
+  if (storedUserId) {
+    return storedUserId;
+  }
+
+  // Generate a new UUID if not found
+  const newUserId = generateUUID();
+  localStorage.setItem("consent_user_id", newUserId);
+  return newUserId;
+};
 
 export default function MyConsentsPage() {
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [renewDialogOpen, setRenewDialogOpen] = useState(false);
   const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null);
+  // Use lazy initialization to get userId from localStorage
+  const [userId] = useState<string>(() => getOrCreateUserId());
 
   const { data, isLoading, error } = useGetUserConsents(
     DEFAULT_DATA_FIDUCIARY_ID,
-    DEFAULT_EXTERNAL_USER_ID,
+    userId,
     LIMIT
   );
 
@@ -129,7 +157,8 @@ export default function MyConsentsPage() {
     }
   };
 
-  if (isLoading) {
+  // Show loading while retrieving userId or fetching consents
+  if (!userId || isLoading) {
     return (
       <div className="min-h-screen bg-white">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
