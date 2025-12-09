@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGetUserConsents, useWithdrawConsent, useRenewConsent } from "@/services/consent-lifecycle/queries";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +43,73 @@ const generateUUID = (): string => {
 const DEFAULT_DATA_FIDUCIARY_ID = "99d8e106-9ed6-4698-8db0-71c0aa91ab24";
 const LIMIT = 100000;
 
+const SUPPORTED_LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "ta", label: "தமிழ்" },
+  { code: "te", label: "తెలుగు" },
+  { code: "kn", label: "ಕನ್ನಡ" },
+];
+
+const UI_COPY: Record<string, Record<string, string>> = {
+  header: {
+    en: "My Consents",
+    hi: "मेरी सहमतियाँ",
+    ta: "என் சம்மதங்கள்",
+    te: "నా సమ్మతులు",
+    kn: "ನನ್ನ ಸಮ್ಮತಿಗಳು",
+  },
+  subtitle: {
+    en: "Manage and view all your consent artifacts",
+    hi: "अपनी सभी सहमति आर्टिफैक्ट्स देखें और प्रबंधित करें",
+    ta: "உங்கள் அனைத்து சம்மதி ஆவணங்களையும் காணவும் மேலாண்மை செய்யவும்",
+    te: "మీ అన్ని సమ్మతి పత్రాలను చూడండి మరియు నిర్వహించండి",
+    kn: "ನಿಮ್ಮ ಎಲ್ಲಾ ಸಮ್ಮತಿ ಆರ್ಥಿಫ್ಯಾಕ್ಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ",
+  },
+  purposes: {
+    en: "Purposes",
+    hi: "उद्देश्यों",
+    ta: "நோக்கங்கள்",
+    te: "ఉద్దేశాలు",
+    kn: "ಉದ್ದೇಶಗಳು",
+  },
+  withdraw: {
+    en: "Withdraw Consent",
+    hi: "सहमति वापस लें",
+    ta: "சம்மதத்தை வாபஸ் பெறவும்",
+    te: "సమ్మతిని ఉపసంహరించండి",
+    kn: "ಸಮ್ಮತಿಯನ್ನು ಹಿಂಪಡೆಯಿರಿ",
+  },
+  renew: {
+    en: "Renew Consent",
+    hi: "सहमति नवीनीकृत करें",
+    ta: "சம்மதத்தை புதுப்பிக்கவும்",
+    te: "సమ్మతిని పునరుద్ధరించండి",
+    kn: "ಸಮ್ಮತಿಯನ್ನು ನವೀಕರಿಸಿ",
+  },
+  grievance: {
+    en: "Report Grievance",
+    hi: "शिकायत दर्ज करें",
+    ta: "புகார் அளிக்கவும்",
+    te: "ఫిర్యాదు చేయండి",
+    kn: "ದೂರು ನೀಡಿ",
+  },
+  noConsentsTitle: {
+    en: "No Consents Found",
+    hi: "कोई सहमति नहीं मिली",
+    ta: "சம்மதங்கள் எதுவும் இல்லை",
+    te: "ఏ సమ్మతులు కనబడలేదు",
+    kn: "ಯಾವುದೇ ಸಮ್ಮತಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
+  },
+  noConsentsText: {
+    en: "You don't have any consent artifacts yet. Consents will appear here once you grant them.",
+    hi: "अभी तक आपके पास कोई सहमति आर्टिफैक्ट नहीं है। सहमतियाँ यहां प्रदर्शित होंगी।",
+    ta: "உங்களிடம் இன்னும் சம்மதி ஆவணங்கள் இல்லை. நீங்கள் சம்மதித்தவுடன் அவை இங்கே தோன்றும்.",
+    te: "మీ వద్ద ఇంకా సమ్మతి పత్రాలు లేవు. మీరు సమ్మతి ఇచ్చిన తర్వాత అవి ఇక్కడ కనిపిస్తాయి.",
+    kn: "ನಿಮ್ಮಲ್ಲಿ ಇನ್ನೂ ಯಾವುದೇ ಸಮ್ಮತಿ ಆರ್ಥಿಫ್ಯಾಕ್ಟ್‌ಗಳಿಲ್ಲ. ನೀವು ಸಮ್ಮತಿ ನೀಡಿದ ನಂತರ ಅವು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.",
+  },
+};
+
 // Helper function to get or create user ID from localStorage
 const getOrCreateUserId = (): string => {
   if (typeof window === "undefined") return "";
@@ -64,6 +131,10 @@ export default function MyConsentsPage() {
   const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null);
   // Use lazy initialization to get userId from localStorage
   const [userId] = useState<string>(() => getOrCreateUserId());
+  const [selectedLang, setSelectedLang] = useState<string>("en");
+  const [translationCache, setTranslationCache] = useState<Record<string, string>>({});
+  const [isTranslating, setIsTranslating] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   const { data, isLoading, error } = useGetUserConsents(
     DEFAULT_DATA_FIDUCIARY_ID,
@@ -134,6 +205,78 @@ export default function MyConsentsPage() {
     console.log("Report grievance:", consentId);
   };
 
+  // Translate text via LibreTranslate (open-source, free tier). Best-effort; caches results.
+  const translateText = async (text: string, targetLang: string): Promise<string> => {
+    const cacheKey = `${targetLang}:${text}`;
+    if (translationCache[cacheKey]) return translationCache[cacheKey];
+    if (targetLang === "en" || !text.trim()) return text;
+
+    try {
+      if (abortRef.current) {
+        abortRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortRef.current = controller;
+      setIsTranslating(true);
+
+      const response = await fetch("https://libretranslate.de/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          q: text,
+          source: "auto",
+          target: targetLang,
+          format: "text",
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) throw new Error("Translation failed");
+      const result = await response.json();
+      const translated = result?.translatedText || text;
+
+      setTranslationCache((prev) => ({ ...prev, [cacheKey]: translated }));
+      return translated;
+    } catch (err) {
+      console.error("Translation error:", err);
+      return text;
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // Pre-translate dynamic purpose titles when language changes
+  useEffect(() => {
+    const pretranslate = async () => {
+      if (selectedLang === "en" || !data?.data?.data?.length) return;
+      setIsTranslating(true);
+
+      const titles = new Set<string>();
+      data.data.data.forEach((consent) => {
+        consent.purposes.forEach((p: { title: string }) => titles.add(p.title));
+      });
+
+      await Promise.all(
+        Array.from(titles).map((title) => translateText(title, selectedLang))
+      );
+
+      setIsTranslating(false);
+    };
+
+    pretranslate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLang, data?.data?.data]);
+
+  const getTranslated = (text: string) => {
+    if (selectedLang === "en") return text;
+    const key = `${selectedLang}:${text}`;
+    return translationCache[key] || text;
+  };
+
+  const t = (key: keyof typeof UI_COPY) => {
+    return UI_COPY[key]?.[selectedLang] || UI_COPY[key]?.en || "";
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -200,20 +343,43 @@ export default function MyConsentsPage() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Shield className="h-6 w-6 text-primary" />
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">{t("header")}</h1>
+                <p className="text-muted-foreground mt-1">
+                  {t("subtitle")}
+                  {pagination && (
+                    <span className="ml-2 text-sm font-medium">
+                      ({pagination.total} total consent{pagination.total !== 1 ? "s" : ""})
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Consents</h1>
-              <p className="text-muted-foreground mt-1">
-                Manage and view all your consent artifacts
-                {pagination && (
-                  <span className="ml-2 text-sm font-medium">
-                    ({pagination.total} total consent{pagination.total !== 1 ? "s" : ""})
-                  </span>
-                )}
-              </p>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-muted-foreground" htmlFor="language-select">
+                Language
+              </label>
+              <select
+                id="language-select"
+                className="border rounded-md px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary"
+                value={selectedLang}
+                onChange={(e) => setSelectedLang(e.target.value)}
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+              {isTranslating && (
+                <span className="text-xs text-muted-foreground">Translating…</span>
+              )}
             </div>
           </div>
         </div>
@@ -243,7 +409,7 @@ export default function MyConsentsPage() {
                           <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0" aria-hidden="true">
                             <Shield className="h-4 w-4 text-primary" />
                           </div>
-                          <CardTitle className="text-lg">Consent Artifact</CardTitle>
+                          <CardTitle className="text-lg">{getTranslated("Consent Artifact")}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
                           {getStatusBadge(consent.status)}
@@ -261,7 +427,7 @@ export default function MyConsentsPage() {
                       <div className="flex items-center gap-2 mb-1.5">
                         <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
                         <span className="text-sm font-semibold text-gray-900">
-                          Purposes ({consent.purposes.length})
+                          {t("purposes")} ({consent.purposes.length})
                         </span>
                       </div>
                       <div className="space-y-1">
@@ -271,7 +437,7 @@ export default function MyConsentsPage() {
                             className="text-sm text-gray-700 flex items-start gap-2"
                           >
                             <span className="font-semibold text-primary shrink-0" aria-hidden="true">{idx + 1}.</span>
-                            <span className="line-clamp-2">{purpose.title}</span>
+                            <span className="line-clamp-2">{getTranslated(purpose.title)}</span>
                           </div>
                         ))}
                         {consent.purposes.length > 3 && (
@@ -321,7 +487,7 @@ export default function MyConsentsPage() {
                             aria-label={`Withdraw consent for artifact ${consent.consent_artifact_id.slice(0, 8)}`}
                           >
                             <XCircle className="h-4 w-4" aria-hidden="true" />
-                            Withdraw Consent
+                            {t("withdraw")}
                           </Button>
                           <Button
                             variant="outline"
@@ -331,7 +497,7 @@ export default function MyConsentsPage() {
                             aria-label={`Renew consent for artifact ${consent.consent_artifact_id.slice(0, 8)}`}
                           >
                             <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                            Renew Consent
+                            {t("renew")}
                           </Button>
                         </>
                       )}
@@ -343,7 +509,7 @@ export default function MyConsentsPage() {
                         aria-label={`Report grievance for consent artifact ${consent.consent_artifact_id.slice(0, 8)}`}
                       >
                         <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-                        Report Grievance
+                        {t("grievance")}
                       </Button>
                     </div>
                   </CardContent>
@@ -355,9 +521,9 @@ export default function MyConsentsPage() {
           <Card>
             <CardContent className="pt-6 text-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Consents Found</h3>
+              <h3 className="text-lg font-semibold mb-2">{t("noConsentsTitle")}</h3>
               <p className="text-sm text-muted-foreground">
-                You don&apos;t have any consent artifacts yet. Consents will appear here once you grant them.
+                {t("noConsentsText")}
               </p>
             </CardContent>
           </Card>
