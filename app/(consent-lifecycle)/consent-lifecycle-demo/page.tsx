@@ -158,24 +158,21 @@ export default function ConsentLifecycleDemoPage() {
 
       if (result.success && result.data) {
         setIsInitiated(true);
-        // Navigate to consent notice page using cms_request_id
-        router.push(`/consents/${result.data.cms_request_id}`);
+        // Navigate to consent notice page using cms_request_id and pass userId as query param
+        router.push(`/consents/${result.data.cms_request_id}?userId=${userId}`);
       }
     } catch (error) {
       console.error("Failed to initiate consent:", error);
     }
   };
 
-  // Generate UUID on mount and store in localStorage
+  // Generate a NEW UUID each time consent is initiated (don't reuse from localStorage)
   useEffect(() => {
-    const storedUserId = localStorage.getItem("consent_user_id");
-    if (storedUserId) {
-      setUserId(storedUserId);
-    } else {
-      const newUserId = generateUUID();
-      setUserId(newUserId);
-      localStorage.setItem("consent_user_id", newUserId);
-    }
+    // Generate a new UUID for each consent initiation
+    const newUserId = generateUUID();
+    setUserId(newUserId);
+    // Store it in localStorage for the consent notice page to access
+    localStorage.setItem("consent_user_id", newUserId);
   }, []);
 
   // Auto-initiate consent when user ID is ready and purposes are loaded

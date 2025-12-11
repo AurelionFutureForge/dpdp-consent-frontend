@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useGetConsentNotice, useSubmitConsent } from "@/services/consent-lifecycle/queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -149,10 +149,21 @@ const UI_COPY: Record<string, Record<string, string>> = {
   },
 };
 
+// Helper function to get userId from localStorage
+const getUserIdFromStorage = (): string => {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem("consent_user_id") || "";
+};
+
 export default function ConsentNoticePage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const cmsRequestId = params.cms_request_id as string;
+
+  // Get userId from query params (priority) or localStorage (fallback)
+  const userIdFromQuery = searchParams.get("userId");
+  const userId = userIdFromQuery || getUserIdFromStorage();
 
   const { data, isLoading, error } = useGetConsentNotice(cmsRequestId);
   const submitMutation = useSubmitConsent();
@@ -389,19 +400,27 @@ export default function ConsentNoticePage() {
   };
 
   const handleReturnToProvider = () => {
-    router.push("/my-consents");
+    if (userId) {
+      router.push(`/my-consents/${userId}`);
+    } else {
+      router.push("/my-consents");
+    }
   };
 
   // Auto-navigate to my-consents after 3 seconds
   useEffect(() => {
     if (isSubmitted) {
       const timer = setTimeout(() => {
-        router.push("/my-consents");
+        if (userId) {
+          router.push(`/my-consents/${userId}`);
+        } else {
+          router.push("/my-consents");
+        }
       }, 3000);
 
       return () => clearTimeout(timer);
     }
-  }, [isSubmitted, router]);
+  }, [isSubmitted, router, userId]);
 
   if (isLoading) {
     return (
