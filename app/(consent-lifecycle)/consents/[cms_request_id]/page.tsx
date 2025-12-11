@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useGetConsentNotice, useSubmitConsent } from "@/services/consent-lifecycle/queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -151,6 +151,7 @@ const UI_COPY: Record<string, Record<string, string>> = {
 
 export default function ConsentNoticePage() {
   const params = useParams();
+  const router = useRouter();
   const cmsRequestId = params.cms_request_id as string;
 
   const { data, isLoading, error } = useGetConsentNotice(cmsRequestId);
@@ -363,7 +364,7 @@ export default function ConsentNoticePage() {
         cms_request_id: cmsRequestId,
         selected_purposes: Array.from(selectedPurposes),
         agree: true,
-        language_code: data?.data?.language_config?.language_code || "en",
+        language_code: selectedLang,
         ip_address: undefined,
         user_agent: typeof window !== "undefined" ? window.navigator.userAgent : undefined,
       });
@@ -388,10 +389,19 @@ export default function ConsentNoticePage() {
   };
 
   const handleReturnToProvider = () => {
-    if (submittedData?.redirectUrl) {
-      window.location.href = submittedData.redirectUrl;
-    }
+    router.push("/my-consents");
   };
+
+  // Auto-navigate to my-consents after 3 seconds
+  useEffect(() => {
+    if (isSubmitted) {
+      const timer = setTimeout(() => {
+        router.push("/my-consents");
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isSubmitted, router]);
 
   if (isLoading) {
     return (
