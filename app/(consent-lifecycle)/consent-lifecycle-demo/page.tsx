@@ -104,7 +104,6 @@ export default function ConsentLifecycleDemoPage() {
   // Default values for consent initiation
   const DEFAULT_DATA_FIDUCIARY_ID = "99d8e106-9ed6-4698-8db0-71c0aa91ab24";
   const duration = 365;
-  const language = "en";
   const DEFAULT_EMAIL = "venkatesangunaraj@gmail.com";
   const DEFAULT_PHONE = "8925454607";
 
@@ -150,7 +149,7 @@ export default function ConsentLifecycleDemoPage() {
         user_id: userId,
         purposes: allPurposeIds,
         duration: duration,
-        language: language,
+        language: selectedLang,
         metadata: {},
         redirect_url: redirectUrl,
         email: DEFAULT_EMAIL,
